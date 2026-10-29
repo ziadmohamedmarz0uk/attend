@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Next.js
+.next/
+out/
+build/
+dist/
+
+# Environment files
+.env
+.env*.local
+.env.local
+.env.development
+.env.production
+backend/.env
+frontend/.env.local
+!.env.example
+!backend/.env.example
+!frontend/.env.example
+
+# Temporary / Scratch scripts
+scratch/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*.sqlite
+*.sqlite-journal
+.idea/
+.vscode/*
+!.vscode/extensions.json
