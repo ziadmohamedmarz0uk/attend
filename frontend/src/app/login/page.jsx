@@ -8,18 +8,15 @@ import {
   Lock,
   Mail,
   ArrowLeft,
-  Sparkles,
   MapPin,
   Activity,
   AlertCircle,
-  UserCheck,
   Briefcase,
   KeyRound,
   Loader2,
   Eye,
   EyeOff,
-  Cpu,
-  Crown
+  Cpu
 } from 'lucide-react';
 
 export default function LoginPage() {
@@ -31,7 +28,6 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [activeDemo, setActiveDemo] = useState(null);
 
   // If user is already logged in, redirect them based on role
   useEffect(() => {
@@ -70,34 +66,6 @@ export default function LoginPage() {
       setErrorMsg('حدث خطأ في الاتصال بالخادم.');
     } finally {
       setIsSubmitting(false);
-      setActiveDemo(null);
-    }
-  };
-
-  const handleQuickDemo = async (demoEmail, demoPassword, demoKey) => {
-    setEmail(demoEmail);
-    setPassword(demoPassword);
-    setErrorMsg('');
-    setIsSubmitting(true);
-    setActiveDemo(demoKey);
-
-    try {
-      const res = await login(demoEmail, demoPassword);
-      if (res.success) {
-        const targetRole = res.user?.role || 'employee';
-        if (targetRole === 'owner') {
-          router.push('/dashboard/owner');
-        } else {
-          router.push('/dashboard/employee');
-        }
-      } else {
-        setErrorMsg(res.message || 'تعذر تسجيل الدخول بالحساب التجريبي.');
-      }
-    } catch (err) {
-      setErrorMsg('خطأ أثناء إجراء الدخول السريع التجريبي.');
-    } finally {
-      setIsSubmitting(false);
-      setActiveDemo(null);
     }
   };
 
@@ -253,9 +221,9 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full mt-2 bg-slate-900 hover:bg-black text-white font-bold py-3.5 px-6 rounded-xl shadow-xs transition-all duration-200 active:scale-[0.99] disabled:opacity-70 flex items-center justify-center gap-2 text-sm"
+                  className="w-full mt-2 bg-slate-900 hover:bg-black text-white font-bold py-3.5 px-6 rounded-xl shadow-xs transition-all duration-200 active:scale-[0.99] disabled:opacity-70 flex items-center justify-center gap-2 text-sm cursor-pointer"
                 >
-                  {isSubmitting && !activeDemo ? (
+                  {isSubmitting ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
                       <span>جاري التحقق...</span>
@@ -268,69 +236,6 @@ export default function LoginPage() {
                   )}
                 </button>
               </form>
-
-              {/* Quick Demo Access Divider */}
-              <div className="relative my-6">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-slate-200"></div>
-                </div>
-                <div className="relative flex justify-center text-xs">
-                  <span className="bg-white px-3 text-slate-500 flex items-center gap-1.5 font-bold">
-                    <Sparkles className="w-3.5 h-3.5 text-slate-700" />
-                    دخول تجريبي سريع (Demo)
-                  </span>
-                </div>
-              </div>
-
-              {/* Demo Access Buttons Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {/* Owner Demo Button */}
-                <button
-                  type="button"
-                  disabled={isSubmitting}
-                  onClick={() => handleQuickDemo('owner@company.com', '123456', 'owner')}
-                  className="p-3.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-slate-300 transition-all text-right flex flex-col justify-between disabled:opacity-60 relative"
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="flex items-center gap-1.5 text-xs font-bold text-slate-900">
-                      <Crown className="w-3.5 h-3.5 text-slate-800" />
-                      دخول كـ Owner
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-500 font-medium">
-                    لوحة الإدارة الكاملة
-                  </p>
-                  {activeDemo === 'owner' && (
-                    <div className="absolute inset-0 bg-white/80 rounded-xl flex items-center justify-center gap-2 text-xs text-slate-900 font-bold z-20">
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    </div>
-                  )}
-                </button>
-
-                {/* Employee Demo Button */}
-                <button
-                  type="button"
-                  disabled={isSubmitting}
-                  onClick={() => handleQuickDemo('ahmed@company.com', '123456', 'emp1')}
-                  className="p-3.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-slate-300 transition-all text-right flex flex-col justify-between disabled:opacity-60 relative"
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="flex items-center gap-1.5 text-xs font-bold text-slate-900">
-                      <UserCheck className="w-3.5 h-3.5 text-slate-800" />
-                      دخول كـ Employee
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-500 font-medium">
-                    الحضور بالـ GPS والنقاط
-                  </p>
-                  {activeDemo === 'emp1' && (
-                    <div className="absolute inset-0 bg-white/80 rounded-xl flex items-center justify-center gap-2 text-xs text-slate-900 font-bold z-20">
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    </div>
-                  )}
-                </button>
-              </div>
-
             </div>
           </div>
         </div>

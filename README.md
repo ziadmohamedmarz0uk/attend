@@ -208,3 +208,4 @@ attend/
 
 - **المطور الرئيسي:** [زياد محمد مرزوق (Ziad Mohamed Marzouk)](https://github.com/ziadmohamedmarz0uk)
 - **الترخيص البرمجي:** مرخص تحت رخصة [MIT License](LICENSE) المفتوحة للاستخدام التجاري والمؤسسي.
+
