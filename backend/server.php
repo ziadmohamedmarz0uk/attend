@@ -286,12 +286,30 @@ function requireAuth($user, $requiredRole = null) {
 // ROUTES DISPATCHER
 // -------------------------------------------------------------
 
-// Health check
-if ($uri === '/api/health' || $uri === '/health') {
+// Root entry & Health check routes
+if ($uri === '/' || $uri === '/api' || $uri === '/api/' || $uri === '/health' || $uri === '/api/health') {
+    $dbConnected = false;
+    $dbMessage = 'Disconnected';
+    if ($pdo) {
+        try {
+            $pdo->query("SELECT 1");
+            $dbConnected = true;
+            $dbMessage = 'Connected (' . $dbName . ')';
+        } catch (\Exception $e) {
+            $dbMessage = 'Query Failed: ' . $e->getMessage();
+        }
+    } else if ($dbError) {
+        $dbMessage = 'Connection Error: ' . $dbError;
+    }
+
     echo json_encode([
         'status' => 'HEALTHY',
-        'database' => 'MySQL smart_attendance_db',
-        'timestamp' => date('Y-m-d H:i:s')
+        'service' => 'Attend Pro REST API Engine',
+        'version' => '2.5.0',
+        'database_connected' => $dbConnected,
+        'database_status' => $dbMessage,
+        'timestamp' => date('Y-m-d H:i:s'),
+        'timezone' => date_default_timezone_get()
     ]);
     exit();
 }

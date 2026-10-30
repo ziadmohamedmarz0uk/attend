@@ -8,7 +8,8 @@ WORKDIR /app
 # Copy project files
 COPY . /app
 
-# Set default timezone
+# Enable concurrent worker processes for PHP CLI Server
+ENV PHP_CLI_SERVER_WORKERS=4
 ENV TZ=Africa/Cairo
 
 # Expose default port
@@ -17,3 +18,4 @@ EXPOSE 8000
 
 # Run PHP built-in web server with server.php as the application router
 CMD ["sh", "-c", "php -S 0.0.0.0:${PORT:-8000} /app/backend/server.php"]
+
