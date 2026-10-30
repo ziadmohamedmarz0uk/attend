@@ -21,19 +21,28 @@ if (file_exists($envPath)) {
 }
 
 try {
-    $host = $env['DB_HOST'] ?? '127.0.0.1';
-    $port = $env['DB_PORT'] ?? 3306;
-    $dbName = $env['DB_DATABASE'] ?? 'smart_attendance_db';
-    $user = $env['DB_USERNAME'] ?? 'root';
-    $pass = $env['DB_PASSWORD'] ?? '';
+    $host = $env['DB_HOST'] ?? (getenv('DB_HOST') ?: (getenv('MYSQL_HOST') ?: '127.0.0.1'));
+    $port = $env['DB_PORT'] ?? (getenv('DB_PORT') ?: (getenv('MYSQL_PORT') ?: 3306));
+    $dbName = $env['DB_DATABASE'] ?? (getenv('DB_DATABASE') ?: (getenv('MYSQL_DATABASE') ?: 'smart_attendance_db'));
+    $user = $env['DB_USERNAME'] ?? (getenv('DB_USERNAME') ?: (getenv('MYSQL_USER') ?: 'root'));
+    $pass = $env['DB_PASSWORD'] ?? (getenv('DB_PASSWORD') ?: (getenv('MYSQL_PASSWORD') ?: ''));
 
-    $pdo = new PDO("mysql:host={$host};port={$port}", $user, $pass);
+    $pdoOptions = [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+    ];
+    if (!in_array($host, ['127.0.0.1', 'localhost']) || (int)$port === 4000 || getenv('DB_SSL') === 'true') {
+        if (defined('PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT')) {
+            $pdoOptions[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
+        }
+    }
+
+    $pdo = new PDO("mysql:host={$host};port={$port}", $user, $pass, $pdoOptions);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     // Create database if not exists
     $pdo->exec("CREATE DATABASE IF NOT EXISTS `{$dbName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;");
     
-    $pdoDb = new PDO("mysql:host={$host};port={$port};dbname={$dbName}", $user, $pass);
+    $pdoDb = new PDO("mysql:host={$host};port={$port};dbname={$dbName}", $user, $pass, $pdoOptions);
     $pdoDb->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     // Drop old tables to ensure fresh clean rich schema

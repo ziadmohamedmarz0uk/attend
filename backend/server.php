@@ -38,26 +38,36 @@ if (file_exists($envPath)) {
     }
 }
 
-$dbHost = $env['DB_HOST'] ?? '127.0.0.1';
-$dbPort = $env['DB_PORT'] ?? 3306;
-$dbName = $env['DB_DATABASE'] ?? 'smart_attendance_db';
-$dbUser = $env['DB_USERNAME'] ?? 'root';
-$dbPass = $env['DB_PASSWORD'] ?? '';
+$dbHost = $env['DB_HOST'] ?? (getenv('DB_HOST') ?: (getenv('MYSQL_HOST') ?: '127.0.0.1'));
+$dbPort = $env['DB_PORT'] ?? (getenv('DB_PORT') ?: (getenv('MYSQL_PORT') ?: 3306));
+$dbName = $env['DB_DATABASE'] ?? (getenv('DB_DATABASE') ?: (getenv('MYSQL_DATABASE') ?: 'smart_attendance_db'));
+$dbUser = $env['DB_USERNAME'] ?? (getenv('DB_USERNAME') ?: (getenv('MYSQL_USER') ?: 'root'));
+$dbPass = $env['DB_PASSWORD'] ?? (getenv('DB_PASSWORD') ?: (getenv('MYSQL_PASSWORD') ?: ''));
 
-$jwtSecret = $env['JWT_SECRET'] ?? 'attendance_hmac_secret_key_default_998877';
-$geofenceRadiusDefault = (int)($env['GEOFENCE_RADIUS_METERS'] ?? 100);
-$maxAllowedAccuracy = (float)($env['MAX_ALLOWED_GPS_ACCURACY_METERS'] ?? 50.0);
+$jwtSecret = $env['JWT_SECRET'] ?? (getenv('JWT_SECRET') ?: 'attendance_hmac_secret_key_default_998877');
+$geofenceRadiusDefault = (int)($env['GEOFENCE_RADIUS_METERS'] ?? (getenv('GEOFENCE_RADIUS_METERS') ?: 100));
+$maxAllowedAccuracy = (float)($env['MAX_ALLOWED_GPS_ACCURACY_METERS'] ?? (getenv('MAX_ALLOWED_GPS_ACCURACY_METERS') ?: 50.0));
 $allowSimulation = (isset($env['ALLOW_SIMULATION']) && filter_var($env['ALLOW_SIMULATION'], FILTER_VALIDATE_BOOLEAN))
+                || (getenv('ALLOW_SIMULATION') !== false && filter_var(getenv('ALLOW_SIMULATION'), FILTER_VALIDATE_BOOLEAN))
                 || (isset($env['APP_DEBUG']) && filter_var($env['APP_DEBUG'], FILTER_VALIDATE_BOOLEAN));
 
 // Connect to MySQL database (soft-fail — endpoints with fallback data work without DB)
 $pdo = null;
 $dbError = null;
 try {
-    $pdo = new PDO("mysql:host={$dbHost};port={$dbPort};dbname={$dbName};charset=utf8mb4", $dbUser, $dbPass, [
+    $pdoOptions = [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    ]);
+    ];
+
+    // Enable SSL for cloud database providers (TiDB Cloud, Aiven, etc.)
+    if (!in_array($dbHost, ['127.0.0.1', 'localhost']) || (int)$dbPort === 4000 || getenv('DB_SSL') === 'true') {
+        if (defined('PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT')) {
+            $pdoOptions[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
+        }
+    }
+
+    $pdo = new PDO("mysql:host={$dbHost};port={$dbPort};dbname={$dbName};charset=utf8mb4", $dbUser, $dbPass, $pdoOptions);
 
     // Ensure dispute_tickets table exists
     $pdo->exec("CREATE TABLE IF NOT EXISTS dispute_tickets (
